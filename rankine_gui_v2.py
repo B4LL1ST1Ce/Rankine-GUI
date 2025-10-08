@@ -13,27 +13,22 @@ s5 = SC.States()
 s6 = SC.States()
 
 def createStateTable():
+    state = {
+        1: {'H': s1.h, 'P': s1.p, 'T': s1.t, 'S': s1.s, 'Q': s1.q, 'D': s1.d, 'V': s1.v},
+        2: {'H': s2.h, 'P': s2.p, 'T': s2.t, 'S': s2.s, 'Q': s2.q, 'D': s2.d, 'V': s2.v},
+        3: {'H': s3.h, 'P': s3.p, 'T': s3.t, 'S': s3.s, 'Q': s3.q, 'D': s3.d, 'V': s3.v},
+        4: {'H': s4.h, 'P': s4.p, 'T': s4.t, 'S': s4.s, 'Q': s4.q, 'D': s4.d, 'V': s4.v},
+        5: {'H': s5.h, 'P': s5.p, 'T': s5.t, 'S': s5.s, 'Q': s5.q, 'D': s5.d, 'V': s5.v},
+        6: {'H': s6.h, 'P': s6.p, 'T': s6.t, 'S': s6.s, 'Q': s6.q, 'D': s6.d, 'V': s6.v}
+        }
     if cycleSelected.get() == "reheat":
-        state = {
-        1: {'H': s1.h, 'P': s1.p, 'T': s1.t, 'S': s1.s, 'Q': s1.q},
-        2: {'H': s2.h, 'P': s2.p, 'T': s2.t, 'S': s2.s, 'Q': s2.q},
-        3: {'H': s3.h, 'P': s3.p, 'T': s3.t, 'S': s3.s, 'Q': s3.q},
-        4: {'H': s4.h, 'P': s4.p, 'T': s4.t, 'S': s4.s, 'Q': s4.q},
-        5: {'H': s5.h, 'P': s5.p, 'T': s5.t, 'S': s5.s, 'Q': s5.q},
-        6: {'H': s6.h, 'P': s6.p, 'T': s6.t, 'S': s6.s, 'Q': s6.q}
-        }
+        return state
     elif cycleSelected.get() == "simple":
-        state = {
-        1: {'H': s1.h, 'P': s1.p, 'T': s1.t, 'S': s1.s, 'Q': s1.q},
-        2: {'H': s2.h, 'P': s2.p, 'T': s2.t, 'S': s2.s, 'Q': s2.q},
-        3: {'H': s3.h, 'P': s3.p, 'T': s3.t, 'S': s3.s, 'Q': s3.q},
-        4: {'H': s4.h, 'P': s4.p, 'T': s4.t, 'S': s4.s, 'Q': s4.q}
-        }
+        state = {s: p for s, p in state.items() if s in range(1,5)}
+        return state
     elif cycleSelected.get() == "single":
-        state = {
-        1: {'H': s1.h, 'P': s1.p, 'T': s1.t, 'S': s1.s, 'Q': s1.q}
-        }
-    return state
+        state = {s: p for s, p in state.items() if s in range(1, 2)}
+        return state
 
 def matchStateValues(state):
     if cycleSelected.get() == "single":
@@ -64,113 +59,20 @@ def matchStateValues(state):
             state[x][inp] = state[y][inp]
 
 def solveStateValues(state):
-    H = state.get('H')
-    P = state.get('P')
-    T = state.get('T')
-    S = state.get('S')
-    Q = state.get('Q')
 
     updated = False
 
-    if H != None and P != None:
-        if T == None:
-            state['T'] = CP.PropsSI('T', 'H', H, 'P', P, 'water')
-            updated = True
-        if S == None:
-            state['S'] = CP.PropsSI('S', 'H', H, 'P', P, 'water')
-            updated = True
-        if Q == None:
-            state['Q'] = CP.PropsSI('Q', 'H', H, 'P', P, 'water')
-            updated = True
+    knownProps = {prop: value for prop, value in state.items() if value != None}
+    unknownProps = {prop: value for prop, value in state.items() if value == None}
+
+    if len(knownProps) <= 1:
+        return updated
     
-    elif H != None and T != None:
-        if P == None:
-            state['P'] = CP.PropsSI('P', 'H', H, 'T', T, 'water')
-            updated = True
-        if S == None:
-            state['S'] = CP.PropsSI('S', 'H', H, 'T', T, 'water')
-            updated = True
-        if Q == None:
-            state['Q'] = CP.PropsSI('Q', 'H', H, 'T', T, 'water')
-            updated = True
-
-    elif H != None and S != None:
-        if P == None:
-            state['P'] = CP.PropsSI('P', 'H', H, 'S', S, 'water')
-            updated = True
-        if T == None:
-            state['T'] = CP.PropsSI('T', 'H', H, 'S', S, 'water')
-            updated = True
-        if Q == None:
-            state['Q'] = CP.PropsSI('Q', 'H', H, 'S', S, 'water')
-            updated = True
-
-    elif H != None and Q != None:
-        if P == None:
-            state['P'] = CP.PropsSI('P', 'H', H, 'Q', Q, 'water')
-            updated = True
-        if S == None:
-            state['S'] = CP.PropsSI('S', 'H', H, 'Q', Q, 'water')
-            updated = True
-        if Q == None:
-            state['Q'] = CP.PropsSI('Q', 'H', H, 'Q', Q, 'water')
-            updated = True
-
-    elif P != None and T != None:
-        if H == None:
-            state['H'] = CP.PropsSI('H', 'P', P, 'T', T, 'water')
-            updated = True
-        if S == None:
-            state['S'] = CP.PropsSI('S', 'P', P, 'T', T, 'water')
-            updated = True
-        if Q == None:
-            state['Q'] = CP.PropsSI('Q', 'P', P, 'T', T, 'water')
-            updated = True
-
-    elif P != None and S != None:
-        if H == None:
-            state['H'] = CP.PropsSI('H', 'P', P, 'S', S, 'water')
-            updated = True
-        if T == None:
-            state['T'] = CP.PropsSI('T', 'P', P, 'S', S, 'water')
-            updated = True
-        if Q == None:
-            state['Q'] = CP.PropsSI('Q', 'P', P, 'S', S, 'water')
-            updated = True
-
-    elif P != None and Q != None:
-        if H == None:
-            state['H'] = CP.PropsSI('H', 'P', P, 'Q', Q, 'water')
-            updated = True
-        if S == None:
-            state['S'] = CP.PropsSI('S', 'P', P, 'Q', Q, 'water')
-            updated = True
-        if T == None:
-            state['T'] = CP.PropsSI('T', 'P', P, 'Q', Q, 'water')
-            updated = True
-
-    elif T != None and S != None:
-        if H == None:
-            state['H'] = CP.PropsSI('H', 'S', S, 'T', T, 'water')
-            updated = True
-        if P == None:
-            state['P'] = CP.PropsSI('P', 'S', S, 'T', T, 'water')
-            updated = True
-        if Q == None:
-            state['Q'] = CP.PropsSI('Q', 'S', S, 'T', T, 'water')
-            updated = True
-
-    elif T != None and Q != None:
-        if H == None:
-            state['H'] = CP.PropsSI('H', 'Q', Q, 'T', T, 'water')
-            updated = True
-        if P == None:
-            state['P'] = CP.PropsSI('P', 'Q', Q, 'T', T, 'water')
-            updated = True
-        if S == None:
-            state['Q'] = CP.PropsSI('Q', 'Q', Q, 'T', T, 'water')
-            updated = True
-
+    (prop1, val1), (prop2, val2) = list(knownProps.items())[:2]
+    for uprop, val in unknownProps.items():
+        state[uprop] = CP.PropsSI(uprop, prop1, val1, prop2, val2, 'water')
+        updated = True
+    
     return updated
 
 def convertFloat(input):
@@ -186,16 +88,16 @@ def calcClick():
     for i in s1_6:
         i.resetValues()
 
-    s1.enterValues(S1_1Dropdown.get(), convertFloat(S1_1Entry.get()), S1_2Dropdown.get(), convertFloat(S1_2Entry.get()))
-    s2.enterValues(S2_1Dropdown.get(), convertFloat(S2_1Entry.get()), S2_2Dropdown.get(), convertFloat(S2_2Entry.get()))
-    s3.enterValues(S3_1Dropdown.get(), convertFloat(S3_1Entry.get()), S3_2Dropdown.get(), convertFloat(S3_2Entry.get()))
-    s4.enterValues(S4_1Dropdown.get(), convertFloat(S4_1Entry.get()), S4_2Dropdown.get(), convertFloat(S4_2Entry.get()))
-    s5.enterValues(S5_1Dropdown.get(), convertFloat(S5_1Entry.get()), S5_2Dropdown.get(), convertFloat(S5_2Entry.get()))
-    s6.enterValues(S6_1Dropdown.get(), convertFloat(S6_1Entry.get()), S6_2Dropdown.get(), convertFloat(S6_2Entry.get()))
+    s1.enterValues(S1_1Dropdown.get(), convertFloat(S1_1Entry.get()), S1_2Dropdown.get(), convertFloat(S1_2Entry.get()), pressureDropdown.get(), temperatureDropdown.get())
+    s2.enterValues(S2_1Dropdown.get(), convertFloat(S2_1Entry.get()), S2_2Dropdown.get(), convertFloat(S2_2Entry.get()), pressureDropdown.get(), temperatureDropdown.get())
+    s3.enterValues(S3_1Dropdown.get(), convertFloat(S3_1Entry.get()), S3_2Dropdown.get(), convertFloat(S3_2Entry.get()), pressureDropdown.get(), temperatureDropdown.get())
+    s4.enterValues(S4_1Dropdown.get(), convertFloat(S4_1Entry.get()), S4_2Dropdown.get(), convertFloat(S4_2Entry.get()), pressureDropdown.get(), temperatureDropdown.get())
+    s5.enterValues(S5_1Dropdown.get(), convertFloat(S5_1Entry.get()), S5_2Dropdown.get(), convertFloat(S5_2Entry.get()), pressureDropdown.get(), temperatureDropdown.get())
+    s6.enterValues(S6_1Dropdown.get(), convertFloat(S6_1Entry.get()), S6_2Dropdown.get(), convertFloat(S6_2Entry.get()), pressureDropdown.get(), temperatureDropdown.get())
 
     state = createStateTable()
 
-    for _ in range(20):
+    for i in range(20):
         updated_any = False
         matchStateValues(state)
         for x in state.values():
@@ -203,15 +105,6 @@ def calcClick():
             updated_any = updated_any or updated
         if not updated_any:
             break
-
-    # for i, props in state.items():
-    #     print(f"State {i}:")
-    #     for key, value in props.items():
-    #         if value is not None:
-    #             print(f"  {key}: {value:.2f}")
-    #         else:
-    #             print(f"  {key}: None")
-    # print()
 
     if cycleSelected.get() == "reheat":
         h = {i: s['H'] for i, s in state.items()}
@@ -229,29 +122,43 @@ def calcClick():
         q = {i: s['Q'] for i, s in state.items()}
         for i in range(1, 7):
             s1_6[i-1].updateValues('Q', q[i])
-        w_t_HP = h[3]-h[4]
-        w_t_LP = h[5]-h[6]
-        w_turb = w_t_HP+w_t_LP  # in J/kg
-        w_pump = h[2]-h[1]
-        w_net = w_turb-w_pump
-        q_inB = h[3]-h[2]
-        q_inR = h[5]-h[4]
-        q_in = q_inB+q_inR
-        eff = (w_net/q_in)*100
+        d = {i: s['D'] for i, s in state.items()}
+        for i in range(1, 5):
+            s1_6[i-1].updateValues('D', d[i])
+        v = {i: s['V'] for i, s in state.items()}
+        for i in range(1, 5):
+            s1_6[i-1].updateValues('V', v[i])
+        try:
+            w_t_HP = h[3]-h[4]
+            w_t_LP = h[5]-h[6]
+            w_turb = w_t_HP+w_t_LP  # in J/kg
+            w_pump = h[2]-h[1]
+            w_net = w_turb-w_pump
+            q_inB = h[3]-h[2]
+            q_inR = h[5]-h[4]
+            q_in = q_inB+q_inR
+            eff = (w_net/q_in)*100
 
-        textbox.config(state="normal")
-        textbox.delete(1.0, 'end')
-        textbox.insert('end', f"==== Energy Analysis ====")
-        textbox.insert('end', f"\nHP Turbine Work Output: {w_t_HP/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nLP Turbine Work Output: {w_t_LP/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nTurbine Work Output:    {w_turb/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nPump Work Input:        {w_pump/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nNet Work Output:        {w_net/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nNet Heat Input:         {q_in/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nThermal Efficiency:     {eff:.2f}%")
-        textbox.config(state="disabled")
+            textbox.config(state="normal")
+            textbox.delete(1.0, 'end')
+            textbox.insert('end', f"-------- Energy Values --------")
+            textbox.insert('end', f"\nHP Turbine Work Output: {w_t_HP/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nLP Turbine Work Output: {w_t_LP/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nTurbine Work Output:    {w_turb/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nPump Work Input:        {w_pump/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nNet Work Output:        {w_net/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nNet Heat Input:         {q_in/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nThermal Efficiency:     {eff:.2f}%")
+            textbox.config(state="disabled")
 
-        PlotButton.config(state="normal")
+            plotTsButton.config(state="normal")
+            plotPvButton.config(state="normal")
+        except: 
+            textbox.config(state="normal")
+            textbox.delete(1.0, 'end')
+            textbox.insert(1.0, "TypeError: The given values are either unsolvable or inputted incorrectly.")
+            textbox.config(state="disabled")
+            raise TypeError("Unsolvable with the given values.")
     elif cycleSelected.get() == "simple":
         h = {i: s['H'] for i, s in state.items()}
         for i in range(1, 5):
@@ -268,40 +175,64 @@ def calcClick():
         q = {i: s['Q'] for i, s in state.items()}
         for i in range(1, 5):
             s1_6[i-1].updateValues('Q', q[i])
-        w_turb = h[3]-h[4]
-        w_pump = h[2]-h[1]
-        w_net = w_turb-w_pump
-        q_in = h[3]-h[2]
-        eff = (w_net/q_in)*100
+        d = {i: s['D'] for i, s in state.items()}
+        for i in range(1, 5):
+            s1_6[i-1].updateValues('D', d[i])
+        v = {i: s['V'] for i, s in state.items()}
+        for i in range(1, 5):
+            s1_6[i-1].updateValues('V', v[i])
 
-        textbox.config(state="normal")
-        textbox.delete(1.0, 'end')
-        textbox.insert('end', f"===== Energy Analysis =====")
-        textbox.insert('end', f"\nTurbine Work Output: {w_turb/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nPump Work Input:     {w_pump/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nNet Work Output:     {w_net/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nHeat Input:          {q_in/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nThermal Efficiency:  {eff:.2f}%")
-        textbox.config(state="disabled")
+        try: 
+            w_turb = h[3]-h[4]
+            w_pump = h[2]-h[1]
+            w_net = w_turb-w_pump
+            q_in = h[3]-h[2]
+            eff = (w_net/q_in)*100
 
-        PlotButton.config(state="normal")
+            textbox.config(state="normal")
+            textbox.delete(1.0, 'end')
+            textbox.insert('end', f"======== Energy Analysis ========")
+            textbox.insert('end', f"\nTurbine Work Output: {w_turb/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nPump Work Input:     {w_pump/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nNet Work Output:     {w_net/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nHeat Input:          {q_in/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nThermal Efficiency:  {eff:.2f}%")
+            textbox.config(state="disabled")
+
+            plotTsButton.config(state="normal")
+            plotPvButton.config(state="normal")
+        except: 
+            textbox.config(state="normal")
+            textbox.delete(1.0, 'end')
+            textbox.insert(1.0, "TypeError: The given values are either unsolvable or inputted incorrectly.")
+            textbox.config(state="disabled")
+            raise TypeError("Unsolvable with the given values.")
     elif cycleSelected.get() == "single":
-        h = state[1]['H']
-        s = state[1]['S']
-        t = state[1]['T']
-        p = state[1]['P']
-        q = state[1]['Q']
-        textbox.config(state="normal")
-        textbox.delete(1.0, 'end')
-        textbox.insert('end', f"===== Single State Values =====")
-        textbox.insert('end', f"\nSpecific Enthalpy (h): {h/1000:.2f}kJ/kg")
-        textbox.insert('end', f"\nSpecific Entropy (s):  {s/1000:.2f}kJ/kgK")
-        textbox.insert('end', f"\nTemperature (T):       {t:.2f}K")
-        textbox.insert('end', f"\nPressure (P):          {p/1000:.2f}kPa")
-        textbox.insert('end', f"\nDryness Factor:        {q*100:.2f}%")
-        textbox.config(state="disabled")
+        try:
+            h = state[1]['H']
+            s = state[1]['S']
+            t = state[1]['T']
+            p = state[1]['P']
+            q = state[1]['Q']
+            d = state[1]['D']
+            textbox.config(state="normal")
+            textbox.delete(1.0, 'end')
+            textbox.insert('end', f"===== Single State Values =====")
+            textbox.insert('end', f"\nSpecific Enthalpy (h): {h/1000:.2f}kJ/kg")
+            textbox.insert('end', f"\nSpecific Entropy (s):  {s/1000:.2f}kJ/kgK")
+            textbox.insert('end', f"\nTemperature (T):       {t:.2f}K")
+            textbox.insert('end', f"\nPressure (P):          {p/1000:.2f}kPa")
+            textbox.insert('end', f"\nDryness Factor:        {q*100:.2f}%")
+            textbox.config(state="disabled")
+        except: 
+            textbox.config(state="normal")
+            textbox.delete(1.0, 'end')
+            textbox.insert(1.0, "TypeError: The given values are either unsolvable or inputted incorrectly.")
+            textbox.config(state="disabled")
+            raise TypeError("Unsolvable with the given values.")
+    stateDetails(state)
 
-def plotClick():
+def plotClick_Ts():
     if cycleSelected.get() == "reheat":
         T = [s1.t, s2.t, s3.t, s4.t, s5.t, s6.t]
         P = [s1.p, s2.p, s3.p, s4.p, s5.p, s6.p]
@@ -358,17 +289,30 @@ def plotClick():
     plt.title("T-s Graph")
     plt.show()
 
+def plotClick_Pv():
+    V = [s1.v, s2.v, s3.v, s4.v, s5.v, s6.v]
+    P = [s1.p, s2.p, s3.p, s4.p, s5.p, s6.p]
+
+    plt.plot(V, P, 'r')
+    plt.yscale("log")
+    plt.xlabel("Specific Volume (v)")
+    plt.ylabel("Pressure (Pa)")
+    plt.title("T-s Graph")
+    plt.show()
+
 def updatedWindow():
     entries = [S2_1Entry, S2_2Entry, S3_1Entry, S3_2Entry, S4_1Entry, S4_2Entry, S5_1Entry, S5_2Entry, S6_1Entry, S6_2Entry]
     dropdowns = [S2_1Dropdown, S2_2Dropdown, S3_1Dropdown, S3_2Dropdown, S4_1Dropdown, S4_2Dropdown, S5_1Dropdown, S5_2Dropdown, S6_1Dropdown, S6_2Dropdown]
     labels = [S2Label, S3Label, S4Label, S5Label, S6Label]
 
-    PlotButton.config(state="disabled")
+    plotTsButton.config(state="disabled")
+    plotPvButton.config(state="disabled")
     if cycleSelected.get() == "reheat":
         for i in entries + labels:
             i.config(state="normal")
         for i in dropdowns:
             i.config(state="readonly")
+        stateDetails(createStateTable())
     elif cycleSelected.get() == "simple":
         for i in entries[6:10] + dropdowns[6:10] + labels[3:5]:
             i.config(state="disabled")
@@ -376,31 +320,50 @@ def updatedWindow():
             i.config(state="normal")
         for i in dropdowns[0:6]:
             i.config(state="readonly")
+        stateDetails(createStateTable())
     elif cycleSelected.get() == "single":
         for i in entries + dropdowns + labels:
             i.config(state="disabled")
+        stateDetails(createStateTable())
 
+def stateDetails(state):
+    stateFrame.pack(padx=5, pady=10)
+    for widget in stateFrame.winfo_children(): # Blessings be upon gavin for telling this function exists after I spent many a time trying to figure out how to delete each thing individually... sigh. I should've read the documentation.
+        widget.destroy()
+    
+    for i in range(len(state)):
+        stateLabel = tk.Label(stateFrame, text=f"State {i+1}:", borderwidth=1, relief="raised", width=15, height=1, pady=2)
+        stateLabel.grid(row=0, column=i)
+    
+    values = ['H', 'S', 'P', 'T', 'Q', 'D']
+
+    for i in range(len(values)):
+        for j in range(1, len(state)+1):
+            propLabel = tk.Label(stateFrame, text=f"{values[i]}: {roundWithNone(state[j][values[i]])}", borderwidth=1, relief="raised", width=15, height=1, pady=3)
+            propLabel.grid(row=i+1, column=j-1)
+
+def roundWithNone(val):
+    if val == None:
+        return None
+    else:
+        return round(val, 2)
 ### GUI STUFF ============================================================================================================================
 
 window = tk.Tk()
 window.title("Rankine Cycle Calculator")
 window.config(width=700, height=500)
 
-P1isP6 = tk.StringVar()
-P2isP3 = tk.StringVar()
-P4isP5 = tk.StringVar()
-# P1P6 = tk.StringVar(value="MPa")
-# P2P3 = tk.StringVar(value="MPa")
-# P4P5 = tk.StringVar(value="MPa")
+standardPressureValue = tk.StringVar(value="MPa")
+standardTemperaturevalue = tk.StringVar(value="\u00b0C")
+cycleSelected = tk.StringVar(value="reheat")
+pressureValues = ["MPa", "kPa", "Pa"]
+temperatureValues = ["\u00b0C", "K", "\u00b0F"]
+inputValues = ["P", "T", "S", "Q", "H", "D"]
 
 dropdownWidth = 2
 entryWidth = 12
 entrypadX = (5, 0)
 entrypadY = (0, 10)
-cycleSelected = tk.StringVar(value="reheat")
-pressureValues = ["MPa", "kPa", "Pa"]
-temperatureValues = ["\u00b0C", "K", "\u00b0F"]
-inputValues = ["P", "T", "S", "Q", "H"]
 
 titleLabel = tk.Label(window, text="Ideal Rankine Calculator", font=("Arial", 24))
 titleLabel.pack(padx=5, pady=(5, 5))
@@ -489,14 +452,28 @@ S6_1Dropdown.grid(row=0, column=1, padx=(0, 5), pady=entrypadY)
 S6_2Entry.grid(row=1, column=0, padx=entrypadX, pady=entrypadY)
 S6_2Dropdown.grid(row=1, column=1, padx=(0, 5), pady=entrypadY)
 
-selectionFrame = tk.Frame(window)
+selectionFrame = tk.Frame(window, width=700, height=50)
 selectionFrame.pack(padx=5)
-reheatCycleCheckbox = tk.Radiobutton(selectionFrame, variable=cycleSelected, value="reheat", command=lambda:updatedWindow())
-reheatCycleLabel = tk.Label(selectionFrame, text="Reheat Cycle")
-simpleCycleCheckbox = tk.Radiobutton(selectionFrame, variable=cycleSelected, value="simple", command=lambda:updatedWindow())
-simplelCycleLabel = tk.Label(selectionFrame, text="Simple Cycle")
-singleStateCheckbox = tk.Radiobutton(selectionFrame, variable=cycleSelected, value="single", command=lambda:updatedWindow())
-singleStateLabel = tk.Label(selectionFrame, text="Single State")
+
+PTDropdownFrame = tk.Frame(selectionFrame, padx=5)
+PTDropdownFrame.place(relx=0.1, rely=0.5, anchor="center")
+pressureLabel = tk.Label(PTDropdownFrame, text="P")
+pressureLabel.grid(row=0, column=0)
+pressureDropdown = ttk.Combobox(PTDropdownFrame, textvariable=standardPressureValue, values=pressureValues, state="readonly", width=5)
+pressureDropdown.grid(row=1, column=0)
+temperatureLabel = tk.Label(PTDropdownFrame, text="T")
+temperatureLabel.grid(row=0, column=1)
+temperatureDropdown = ttk.Combobox(PTDropdownFrame, textvariable=standardTemperaturevalue, values=temperatureValues, state="readonly", width=5)
+temperatureDropdown.grid(row=1, column=1)
+
+cycleFrame = tk.Frame(selectionFrame, padx=5)
+cycleFrame.place(relx=0.5, rely=0.5, anchor='center')
+reheatCycleCheckbox = tk.Radiobutton(cycleFrame, variable=cycleSelected, value="reheat", command=lambda:updatedWindow())
+reheatCycleLabel = tk.Label(cycleFrame, text="Reheat Cycle")
+simpleCycleCheckbox = tk.Radiobutton(cycleFrame, variable=cycleSelected, value="simple", command=lambda:updatedWindow())
+simplelCycleLabel = tk.Label(cycleFrame, text="Simple Cycle")
+singleStateCheckbox = tk.Radiobutton(cycleFrame, variable=cycleSelected, value="single", command=lambda:updatedWindow())
+singleStateLabel = tk.Label(cycleFrame, text="Single State")
 reheatCycleCheckbox.grid(row=0, column=0)
 reheatCycleLabel.grid(row=1, column=0, padx=10, pady=entrypadY)
 simpleCycleCheckbox.grid(row=0, column=1)
@@ -504,12 +481,18 @@ simplelCycleLabel.grid(row=1, column=1, padx=10, pady=entrypadY)
 singleStateCheckbox.grid(row=0, column=2)
 singleStateLabel.grid(row=1, column=2, padx=10, pady=entrypadY)
 
-CalcPlotFrame = tk.Frame(window)
-CalcPlotFrame.pack(padx=5)
-CalculateButton = tk.Button(CalcPlotFrame, text="Calculate", justify="center" , command=lambda:calcClick())
-CalculateButton.grid(row=0, column=0, padx=5)
-PlotButton = tk.Button(CalcPlotFrame, text="Plot T-s Diagram", justify="center", state="disabled", command=lambda:plotClick())
-PlotButton.grid(row=0, column=1, padx=5)
+calcPlotFrame = tk.Frame(window)
+calcPlotFrame.pack(padx=5)
+calculateButton = tk.Button(calcPlotFrame, text="Calculate", justify="center" , command=lambda:calcClick())
+calculateButton.grid(row=0, column=0, padx=5)
+plotTsButton = tk.Button(calcPlotFrame, text="Plot T-s Diagram", justify="center", state="disabled", command=lambda:plotClick_Ts())
+plotTsButton.grid(row=0, column=1, padx=5)
+plotPvButton = tk.Button(calcPlotFrame, text="Plot P-v Diagram", justify="center", state="disabled", command=lambda:plotClick_Pv())
+plotPvButton.grid(row=0, column=2, padx=5)
+
+stateFrame = tk.Frame(window)
+stateFrame.pack()
+stateDetails(createStateTable())
 
 authorLabel = tk.Label(window, text="Ethan W.")
 authorLabel.pack(side='left', padx=5)

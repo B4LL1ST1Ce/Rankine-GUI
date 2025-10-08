@@ -1,0 +1,15 @@
+v1.0:
+- GUI Calculator for the Reheat Rankine cycle. Only able to accept pressure and temperature values.
+- Basic T-s plotting.
+
+v2.0:
+- Updated to allow any values within the calculation, uses a solver to find missing values. 
+
+v2.1: 
+- Rewrote a more efficient solver (not 100 if elif statements now).
+- Added option to change pressure and temperature units. 
+- Added ability to plot very basic P-v diagrams with given values (will be updated further).
+- Added regular rankine cycle and single state value calculation.
+- Added a table to display all property values for the states. 
+- Added more thermodynamic properties to the calculator. 
+- Other minor fixes/changes. 
