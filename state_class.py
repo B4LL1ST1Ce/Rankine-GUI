@@ -32,6 +32,8 @@ class States:
                     return
                 if p == "MPa":
                     self.p = data1*1000000
+                elif p == "bar":
+                    self.p = data1*100000
                 elif p == "kPa":
                     self.p = data1*1000
                 elif p == "Pa":
@@ -53,14 +55,18 @@ class States:
                     self.t = data2+273
                 elif t == "K":
                     self.t = data2
-                if t == "\u00b0F":
+                elif t == "\u00b0F":
                     self.t = ((data2-32)*(5/9))+273
+                elif t == "\u00b0R":
+                    self.t = data2*(5/9)
             case "P":
                 if data2 == None:
                     self.p = None
                     return
                 if p == "MPa":
                     self.p = data2*1000000
+                elif p == "bar":
+                    self.p = data2*100000
                 elif p == "kPa":
                     self.p = data2*1000
                 elif p == "Pa":

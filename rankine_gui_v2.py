@@ -123,10 +123,10 @@ def calcClick():
         for i in range(1, 7):
             s1_6[i-1].updateValues('Q', q[i])
         d = {i: s['D'] for i, s in state.items()}
-        for i in range(1, 5):
+        for i in range(1, 7):
             s1_6[i-1].updateValues('D', d[i])
         v = {i: s['V'] for i, s in state.items()}
-        for i in range(1, 5):
+        for i in range(1, 7):
             s1_6[i-1].updateValues('V', v[i])
         try:
             w_t_HP = h[3]-h[4]
@@ -290,14 +290,17 @@ def plotClick_Ts():
     plt.show()
 
 def plotClick_Pv():
-    V = [s1.v, s2.v, s3.v, s4.v, s5.v, s6.v]
+    D = [s1.d, s2.d, s3.d, s4.d, s5.d, s6.d]
     P = [s1.p, s2.p, s3.p, s4.p, s5.p, s6.p]
+    V = []
+    for i in D:
+        V.append(1/i)
 
     plt.plot(V, P, 'r')
     plt.yscale("log")
     plt.xlabel("Specific Volume (v)")
     plt.ylabel("Pressure (Pa)")
-    plt.title("T-s Graph")
+    plt.title("P-v Graph")
     plt.show()
 
 def updatedWindow():
@@ -327,20 +330,26 @@ def updatedWindow():
         stateDetails(createStateTable())
 
 def stateDetails(state):
-    stateFrame.pack(padx=5, pady=10)
-    for widget in stateFrame.winfo_children(): # Blessings be upon gavin for telling this function exists after I spent many a time trying to figure out how to delete each thing individually... sigh. I should've read the documentation.
-        widget.destroy()
-    
-    for i in range(len(state)):
-        stateLabel = tk.Label(stateFrame, text=f"State {i+1}:", borderwidth=1, relief="raised", width=15, height=1, pady=2)
-        stateLabel.grid(row=0, column=i)
-    
-    values = ['H', 'S', 'P', 'T', 'Q', 'D']
+    stateFrame.pack(padx=5, pady=5)
+    if showStateValues.get() == False:
+        stateFrame.pack_forget()
+        for widget in stateFrame.winfo_children(): # Blessings be upon gavin for telling this function exists after I spent many a time trying to figure out how to delete each thing individually... sigh. I should've read the documentation.
+            widget.destroy()
+    elif showStateValues.get() == True:
+        authorLabel.pack_forget()
+        versionLabel.pack_forget()
+        for i in range(len(state)):
+            stateLabel = tk.Label(stateFrame, text=f"State {i+1}:", borderwidth=1, relief="raised", width=15, height=1, pady=2)
+            stateLabel.grid(row=0, column=i)
 
-    for i in range(len(values)):
-        for j in range(1, len(state)+1):
-            propLabel = tk.Label(stateFrame, text=f"{values[i]}: {roundWithNone(state[j][values[i]])}", borderwidth=1, relief="raised", width=15, height=1, pady=3)
-            propLabel.grid(row=i+1, column=j-1)
+        values = ['H', 'S', 'P', 'T', 'Q', 'D']
+
+        for i in range(len(values)):
+            for j in range(1, len(state)+1):
+                propLabel = tk.Label(stateFrame, text=f"{values[i]}: {roundWithNone(state[j][values[i]])}", borderwidth=1, relief="raised", width=15, height=1, pady=3)
+                propLabel.grid(row=i+1, column=j-1)
+        authorLabel.pack(side='left', padx=5)
+        versionLabel.pack(side='right', padx=5)
 
 def roundWithNone(val):
     if val == None:
@@ -356,8 +365,9 @@ window.config(width=700, height=500)
 standardPressureValue = tk.StringVar(value="MPa")
 standardTemperaturevalue = tk.StringVar(value="\u00b0C")
 cycleSelected = tk.StringVar(value="reheat")
-pressureValues = ["MPa", "kPa", "Pa"]
-temperatureValues = ["\u00b0C", "K", "\u00b0F"]
+showStateValues = tk.BooleanVar(value=False)
+pressureValues = ["MPa", "bar", "kPa", "Pa"]
+temperatureValues = ["\u00b0C", "K", "\u00b0F", "\u00b0R"]
 inputValues = ["P", "T", "S", "Q", "H", "D"]
 
 dropdownWidth = 2
@@ -490,13 +500,15 @@ plotTsButton.grid(row=0, column=1, padx=5)
 plotPvButton = tk.Button(calcPlotFrame, text="Plot P-v Diagram", justify="center", state="disabled", command=lambda:plotClick_Pv())
 plotPvButton.grid(row=0, column=2, padx=5)
 
+authorLabel = tk.Label(window, text="Ethan W.")
+versionLabel = tk.Label(window, text="v2.1")
+
 stateFrame = tk.Frame(window)
 stateFrame.pack()
 stateDetails(createStateTable())
-
-authorLabel = tk.Label(window, text="Ethan W.")
+showStateDetails = tk.Checkbutton(calcPlotFrame, text="State Details", variable=showStateValues, onvalue=True, offvalue=False, command=lambda:stateDetails(createStateTable()))
+showStateDetails.grid(row=0, column=3, padx=5)
 authorLabel.pack(side='left', padx=5)
-versionLabel = tk.Label(window, text="v2.1")
 versionLabel.pack(side='right', padx=5)
 
 window.mainloop()
