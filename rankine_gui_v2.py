@@ -290,14 +290,36 @@ def plotClick_Ts():
     plt.show()
 
 def plotClick_Pv():
-    D = [s1.d, s2.d, s3.d, s4.d, s5.d, s6.d]
-    P = [s1.p, s2.p, s3.p, s4.p, s5.p, s6.p]
+    D = [s1.d, s2.d, s3.d, s4.d, s5.d, s6.d, s1.d]
+    P = [s1.p, s2.p, s3.p, s4.p, s5.p, s6.p, s1.p]
     V = []
     for i in D:
         V.append(1/i)
+    
+    V1_2 = [V[0], V[1]]
+    P1_2 = [P[0], P[1]]
+    V2_3 = [V[1], V[2]]
+    P2_3 = [P[1], P[2]]
+    V3_4 = np.linspace(V[2], V[3], 100)
+    D3_4 = np.linspace(s3.d, s4.d, 100)
+    P3_4 = [CP.PropsSI('P', 'D', d, 'S', s4.s, 'water') for d in D3_4]
+    V4_5 = [V[3], V[4]]
+    P4_5 = [P[3], P[4]]
+    V5_6 = np.linspace(V[4], V[5], 100)
+    D5_6 = np.linspace(D[4], D[5], 100)
+    P5_6 = [CP.PropsSI('P', 'D', d, 'S', s6.s, 'water') for d in D5_6]
+    V6_1 = [V[5], V[0]]
+    P6_1 = [P[5], P[0]]
 
-    plt.plot(V, P, 'r')
-    plt.yscale("log")
+    plt.plot(V1_2, P1_2, 'r')
+    plt.plot(V2_3, P2_3, 'r')
+    plt.plot(V3_4, P3_4, 'r')
+    plt.plot(V4_5, P4_5, 'r')
+    plt.plot(V5_6, P5_6, 'r')
+    plt.plot(V6_1, P6_1, 'r')
+
+    plt.plot(V, P, 'ko')
+    plt.xscale("log")
     plt.xlabel("Specific Volume (v)")
     plt.ylabel("Pressure (Pa)")
     plt.title("P-v Graph")
