@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import webbrowser as wb
 import CoolProp.CoolProp as CP
 import state_class as SC
 import matplotlib.pyplot as plt
@@ -58,7 +59,7 @@ def matchStateValues(state):
         elif state[y].get(inp) != None and state[x].get(inp) == None:
             state[x][inp] = state[y][inp]
 
-def solveStateValues(state):
+def solveStateValues(state, fluid):
 
     updated = False
 
@@ -70,7 +71,7 @@ def solveStateValues(state):
     
     (prop1, val1), (prop2, val2) = list(knownProps.items())[:2]
     for uprop, val in unknownProps.items():
-        state[uprop] = CP.PropsSI(uprop, prop1, val1, prop2, val2, 'water')
+        state[uprop] = CP.PropsSI(uprop, prop1, val1, prop2, val2, fluid)
         updated = True
     
     return updated
@@ -101,7 +102,7 @@ def calcClick():
         updated_any = False
         matchStateValues(state)
         for x in state.values():
-            updated = solveStateValues(x)
+            updated = solveStateValues(x, fluidEntry.get())
             updated_any = updated_any or updated
         if not updated_any:
             break
@@ -191,7 +192,7 @@ def calcClick():
 
             textbox.config(state="normal")
             textbox.delete(1.0, 'end')
-            textbox.insert('end', f"======== Energy Analysis ========")
+            textbox.insert('end', f"-------- Energy Values --------")
             textbox.insert('end', f"\nTurbine Work Output: {w_turb/1000:.2f}kJ/kg")
             textbox.insert('end', f"\nPump Work Input:     {w_pump/1000:.2f}kJ/kg")
             textbox.insert('end', f"\nNet Work Output:     {w_net/1000:.2f}kJ/kg")
@@ -217,7 +218,7 @@ def calcClick():
             d = state[1]['D']
             textbox.config(state="normal")
             textbox.delete(1.0, 'end')
-            textbox.insert('end', f"===== Single State Values =====")
+            textbox.insert('end', f"-------- State Values --------")
             textbox.insert('end', f"\nSpecific Enthalpy (h): {h/1000:.2f}kJ/kg")
             textbox.insert('end', f"\nSpecific Entropy (s):  {s/1000:.2f}kJ/kgK")
             textbox.insert('end', f"\nTemperature (T):       {t:.2f}K")
@@ -290,33 +291,51 @@ def plotClick_Ts():
     plt.show()
 
 def plotClick_Pv():
-    D = [s1.d, s2.d, s3.d, s4.d, s5.d, s6.d, s1.d]
-    P = [s1.p, s2.p, s3.p, s4.p, s5.p, s6.p, s1.p]
-    V = []
-    for i in D:
-        V.append(1/i)
-    
-    V1_2 = [V[0], V[1]]
-    P1_2 = [P[0], P[1]]
-    V2_3 = [V[1], V[2]]
-    P2_3 = [P[1], P[2]]
-    V3_4 = np.linspace(V[2], V[3], 100)
-    D3_4 = np.linspace(s3.d, s4.d, 100)
-    P3_4 = [CP.PropsSI('P', 'D', d, 'S', s4.s, 'water') for d in D3_4]
-    V4_5 = [V[3], V[4]]
-    P4_5 = [P[3], P[4]]
-    V5_6 = np.linspace(V[4], V[5], 100)
-    D5_6 = np.linspace(D[4], D[5], 100)
-    P5_6 = [CP.PropsSI('P', 'D', d, 'S', s6.s, 'water') for d in D5_6]
-    V6_1 = [V[5], V[0]]
-    P6_1 = [P[5], P[0]]
+    if cycleSelected.get() == "reheat":
+        D = [s1.d, s2.d, s3.d, s4.d, s5.d, s6.d, s1.d]
+        P = [s1.p, s2.p, s3.p, s4.p, s5.p, s6.p, s1.p]
+        V = [(1/i) for i in D]
+        
+        V1_2 = [V[0], V[1]]
+        P1_2 = [P[0], P[1]]
+        V2_3 = [V[1], V[2]]
+        P2_3 = [P[1], P[2]]
+        V3_4 = np.linspace(V[2], V[3], 100)
+        D3_4 = np.linspace(s3.d, s4.d, 100)
+        P3_4 = [CP.PropsSI('P', 'D', d, 'S', s4.s, 'water') for d in D3_4]
+        V4_5 = [V[3], V[4]]
+        P4_5 = [P[3], P[4]]
+        V5_6 = np.linspace(V[4], V[5], 100)
+        D5_6 = np.linspace(D[4], D[5], 100)
+        P5_6 = [CP.PropsSI('P', 'D', d, 'S', s6.s, 'water') for d in D5_6]
+        V6_1 = [V[5], V[0]]
+        P6_1 = [P[5], P[0]]
 
-    plt.plot(V1_2, P1_2, 'r')
-    plt.plot(V2_3, P2_3, 'r')
-    plt.plot(V3_4, P3_4, 'r')
-    plt.plot(V4_5, P4_5, 'r')
-    plt.plot(V5_6, P5_6, 'r')
-    plt.plot(V6_1, P6_1, 'r')
+        plt.plot(V1_2, P1_2, 'r')
+        plt.plot(V2_3, P2_3, 'r')
+        plt.plot(V3_4, P3_4, 'r')
+        plt.plot(V4_5, P4_5, 'r')
+        plt.plot(V5_6, P5_6, 'r')
+        plt.plot(V6_1, P6_1, 'r')
+    elif cycleSelected.get() == "simple":
+        D = [s1.d, s2.d, s3.d, s4.d, s1.d]
+        P = [s1.p, s2.p, s3.p, s4.p, s1.p]
+        V = [(1/i) for i in D]
+        
+        V1_2 = [V[0], V[1]]
+        P1_2 = [P[0], P[1]]
+        V2_3 = [V[1], V[2]]
+        P2_3 = [P[1], P[2]]
+        V3_4 = np.linspace(V[2], V[3], 100)
+        D3_4 = np.linspace(s3.d, s4.d, 100)
+        P3_4 = [CP.PropsSI('P', 'D', d, 'S', s4.s, 'water') for d in D3_4]
+        V4_1 = [V[3], V[4]]
+        P4_1 = [P[3], P[4]]
+
+        plt.plot(V1_2, P1_2, 'r')
+        plt.plot(V2_3, P2_3, 'r')
+        plt.plot(V3_4, P3_4, 'r')
+        plt.plot(V4_1, P4_1, 'r')
 
     plt.plot(V, P, 'ko')
     plt.xscale("log")
@@ -388,6 +407,7 @@ standardPressureValue = tk.StringVar(value="MPa")
 standardTemperaturevalue = tk.StringVar(value="\u00b0C")
 cycleSelected = tk.StringVar(value="reheat")
 showStateValues = tk.BooleanVar(value=False)
+fluid = tk.StringVar(value="Water")
 pressureValues = ["MPa", "bar", "kPa", "Pa"]
 temperatureValues = ["\u00b0C", "K", "\u00b0F", "\u00b0R"]
 inputValues = ["P", "T", "S", "Q", "H", "D"]
@@ -488,7 +508,7 @@ selectionFrame = tk.Frame(window, width=700, height=50)
 selectionFrame.pack(padx=5)
 
 PTDropdownFrame = tk.Frame(selectionFrame, padx=5)
-PTDropdownFrame.place(relx=0.1, rely=0.5, anchor="center")
+PTDropdownFrame.place(relx=0.05, rely=0.5, anchor="w")
 pressureLabel = tk.Label(PTDropdownFrame, text="P")
 pressureLabel.grid(row=0, column=0)
 pressureDropdown = ttk.Combobox(PTDropdownFrame, textvariable=standardPressureValue, values=pressureValues, state="readonly", width=5)
@@ -499,7 +519,7 @@ temperatureDropdown = ttk.Combobox(PTDropdownFrame, textvariable=standardTempera
 temperatureDropdown.grid(row=1, column=1)
 
 cycleFrame = tk.Frame(selectionFrame, padx=5)
-cycleFrame.place(relx=0.5, rely=0.5, anchor='center')
+cycleFrame.place(relx=0.5, rely=0.5, anchor="center")
 reheatCycleCheckbox = tk.Radiobutton(cycleFrame, variable=cycleSelected, value="reheat", command=lambda:updatedWindow())
 reheatCycleLabel = tk.Label(cycleFrame, text="Reheat Cycle")
 simpleCycleCheckbox = tk.Radiobutton(cycleFrame, variable=cycleSelected, value="simple", command=lambda:updatedWindow())
@@ -512,6 +532,14 @@ simpleCycleCheckbox.grid(row=0, column=1)
 simplelCycleLabel.grid(row=1, column=1, padx=10, pady=entrypadY)
 singleStateCheckbox.grid(row=0, column=2)
 singleStateLabel.grid(row=1, column=2, padx=10, pady=entrypadY)
+
+fluidFrame = tk.Frame(selectionFrame, padx=5)
+fluidFrame.place(relx=0.95, rely=0.5, anchor="e")
+fluidLabel = tk.Label(fluidFrame, text="Working Fluid:", cursor="hand2")
+fluidEntry = tk.Entry(fluidFrame, textvariable=fluid, justify="center", relief="sunken",width=15)
+fluidLabel.grid(row=0, column=0)
+fluidEntry.grid(row=1, column=0)
+fluidLabel.bind("<Button-1>", lambda:wb.open_new("https://coolprop.org/fluid_properties/Incompressibles.html"))
 
 calcPlotFrame = tk.Frame(window)
 calcPlotFrame.pack(padx=5)

@@ -13,3 +13,9 @@ v2.1:
 - Added a table to display all property values for the states. 
 - Added more thermodynamic properties to the calculator. 
 - Other minor fixes/changes. 
+
+v2.1.1:
+- Added the ability to input whatever custom working fluid you want, the standard is water.
+  To see the available fluids, you can click on the "Working Fluid:" label.
+- Fixed the P-v diagrams, it also works on the simple cycle now.
+- Other minor fixes/changes.
